@@ -1,0 +1,36 @@
+### Basic statistical information ###
+
+The news dataset includes news from 08/01/2013 to 09/30/2013 for each company. The size of the data is 6.77 GB. Among 500 companies, 14 of them do not have news during that period of time. The 15 companies are:
+
+ROICU, INXBU, CLACW, SANWZ, WTFCW, GALTU, WAFDW, BPOPN, AGIIL, CUBIL, TROVU, TCBIP, TCBIL, CISAW, INTLL
+
+For the rest 485 companies, 406 companies have news for each day during two months. 64 companies have news for 60 days. 5 companies have news for 59 days. 1 company has news for 58 days. 1 (CCCR) has news for 49 days. 1 (ATLC) has news for 48 days. 1 (BNSO) has news for 40 days. 1 (CHSCO) has news for 28 days. 2 (FATE, XLRN) have news for 13 days. 1 (QPAC) has news for 7 days. 1 (OPHT) has news for 6 days. 1 (MONT) has news for 5 days.
+
+# days with news | # companies
+------------------------------
+  61		 |   406
+  60		 |   64
+  59		 |   5
+  58		 |   1
+  49		 |   1
+  48		 |   1
+  40		 |   1
+  28		 |   1
+  13		 |   2
+  7		 |   1
+  6		 |   1
+  5		 |   1
+
+The average number of news everyday among all companies is 21.8. 399 companies have average daily news >= 20. 52 companies have average daily news >= 10 but < 20. 12 companies have average daily news >= 5 but < 10. The rest companies have average daily news < 5.
+
+# average daily news | # companies
+----------------------------------
+  >= 20		     |   399
+  >= 10 & < 20	     |   52
+  >= 5 & < 10	     |   12
+  < 5		     |   22
+
+
+Therefore, we can find that about 80% of companies have news for every day and average daily news number is greater or equal to 20. Based on that, we think the data we have is sufficient. Given a random company, it is highly possible (~97%) that we can get some reasonable news data for it. So we will not fall into the cases that news are always not available. The next step would be label those data according to the price change and use them to train a model.
+
+
