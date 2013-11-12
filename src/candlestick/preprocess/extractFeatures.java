@@ -44,7 +44,8 @@ public class extractFeatures {
             double high = Double.parseDouble(rs.getString("high"));
             double low = Double.parseDouble(rs.getString("low"));
             double close = Double.parseDouble(rs.getString("close"));
-            SingleCandle candle = new SingleCandle(open, high, low, close);
+            int volumn = Integer.parseInt(rs.getString("volumn"));
+            SingleCandle candle = new SingleCandle(open, high, low, close, volumn);
             candles.add(candle);
           }
           String toMonth = (i + 5) > 9 ? year + (i + 5) : year + "0" + (i + 5);

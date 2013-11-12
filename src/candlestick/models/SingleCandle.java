@@ -3,16 +3,18 @@ package candlestick.models;
 
 public class SingleCandle {
   public double open, high, low, close;
+  public int volumn;
   public CandleType type;
   public boolean bull;
   public double bodysize;
   public TrendType trend;
 
-  public SingleCandle(double open, double high, double low, double close) {
+  public SingleCandle(double open, double high, double low, double close, int volumn) {
     this.open = open;
     this.high = high;
     this.low = low;
     this.close = close;
+    this.volumn = volumn;
   }
 
   public void setTrend(TrendType trend) {
