@@ -32,8 +32,8 @@ public class Instance {
     while (i <= (CandleRecognizer.AVG_PERIOD * 2)) {
       CandleRecognizer candle = new CandleRecognizer(candleList);
       if (i == CandleRecognizer.AVG_PERIOD + 1) {
-        // label = candle.getResult().trend;
-        setLabel2(candles);
+        label = candle.getResult().trend;
+        //setLabel2(candles);
       } else {
         patternCandles.add(candle.getResult());
       }

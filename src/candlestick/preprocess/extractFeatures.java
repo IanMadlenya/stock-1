@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import candlestick.models.Instance;
+import candlestick.models.PatternRecognizer;
 import candlestick.models.SingleCandle;
 
 public class extractFeatures {
@@ -29,8 +30,16 @@ public class extractFeatures {
     init();
     ArrayList<String> symbolList = getSymbolList();
     ArrayList<String> yearList = getYearList();
-    String filename = "/Users/none/stock/output3.csv";
+    String filename = "/Users/none/stock/outputfull2.csv";
     BufferedWriter bw = new BufferedWriter(new FileWriter(filename));
+
+    StringBuilder title = new StringBuilder();
+    title.append("label");
+    for (int i = 1; i <= PatternRecognizer.FEATURE_NUM; i++) {
+      title.append(",f" + i);
+    }
+    bw.write(title.toString());
+    bw.newLine();
 
     for (String symbol : symbolList) {
       for (String year : yearList) {
@@ -54,12 +63,10 @@ public class extractFeatures {
           StringBuffer result = new StringBuffer();
           if (instance.getLabel() != null) {
             result.append(instance.getLabel());
-            result.append(",");
             int[] features = instance.getFeatures();
-            for (int k = 0; k < 29; k++) {
-              result.append(features[k] + ",");
+            for (int k = 0; k < PatternRecognizer.FEATURE_NUM; k++) {
+              result.append("," + features[k]);
             }
-            result.append("0");
             //            System.out.println(result);
             bw.write(result.toString());
             bw.newLine();
@@ -67,8 +74,7 @@ public class extractFeatures {
         }
       }
     }
-
-
+    bw.close();
   }
 
   public static ArrayList<String> getSymbolList() throws Exception {
