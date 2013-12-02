@@ -44,10 +44,10 @@ public class extractFeatures {
 
     for (String symbol : symbolList) {
       for (String year : yearList) {
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 11; i++) {
           ArrayList<SingleCandle> candles = new ArrayList<SingleCandle>();
           String query = "SELECT * FROM stockdata WHERE symbol = \"" + symbol + "\" AND MONTH(date) BETWEEN " + i +
-              " AND " + (i + 2) + " AND YEAR(date) = " + year + " order by date desc limit " + (CandleRecognizer.AVG_PERIOD * 2 + 1);
+              " AND " + (i + 1) + " AND YEAR(date) = " + year + " order by date desc limit " + (CandleRecognizer.AVG_PERIOD * 2 + 1);
           rs = stmt.executeQuery(query);
 
           String sector = "";
@@ -84,7 +84,7 @@ public class extractFeatures {
           }
 
           String fromMonth = i > 9 ? year + i : year + "0" + i;
-          String toMonth = (i + 2) > 9 ? year + (i + 2) : year + "0" + (i + 2);
+          String toMonth = (i + 1) > 9 ? year + (i + 1) : year + "0" + (i + 1);
           String time = fromMonth + "-" + toMonth;
 
           if (!date.substring(5, 7).equals(toMonth.substring(4, 6))) {
