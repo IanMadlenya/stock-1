@@ -31,7 +31,7 @@ public class extractFeatures {
     init();
     ArrayList<String> symbolList = getSymbolList();
     ArrayList<String> yearList = getYearList();
-    String filename = "/Users/none/stock/outputfinalfull.csv";
+    String filename = "/Users/none/stock/src/candlestick/extractedFeatures/train.csv";
     BufferedWriter bw = new BufferedWriter(new FileWriter(filename));
 
     StringBuilder title = new StringBuilder();

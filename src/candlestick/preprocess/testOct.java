@@ -31,7 +31,7 @@ public class testOct {
     init();
     ArrayList<String> symbolList = getSymbolList();
     ArrayList<String> dateList = getDateList();
-    String filename = "/Users/none/stock/testOctFeatures.csv";
+    String filename = "/Users/none/stock/src/candlestick/extractedFeatures/validation.csv";
     BufferedWriter bw = new BufferedWriter(new FileWriter(filename));
 
     StringBuilder title = new StringBuilder();
@@ -132,7 +132,7 @@ public class testOct {
 
   public static ArrayList<String> getDateList() throws Exception {
     ArrayList<String> dateList = new ArrayList<String>();
-    rs = stmt.executeQuery("SELECT distinct date FROM stockdata WHERE year(date) = 2013 and month(date) = 10 order by date desc");
+    rs = stmt.executeQuery("SELECT distinct date FROM stockdata WHERE year(date) = 2013 and month(date) = 10 order by date asc limit 13");
     while (rs.next()) {
       String date = rs.getString("date");
       dateList.add(date);
