@@ -272,13 +272,14 @@ public class PatternRecognizer {
     }
 
     // meeting lines the bull
+    // loosen condition
     if (candle1.trend == SingleCandle.TrendType.DOWN
         && !candle1.bull
         && candle2.trend == SingleCandle.TrendType.DOWN
         && candle2.bull
         && (candle1.type == SingleCandle.CandleType.TYPE_LONG || candle1.type == SingleCandle.CandleType.TYPE_MARIBOZU_LONG)
         && (candle2.type == SingleCandle.CandleType.TYPE_LONG || candle2.type == SingleCandle.CandleType.TYPE_MARIBOZU_LONG)
-        && candle1.close == candle2.close
+        && Math.abs(candle1.close - candle2.close) / candle1.close < 0.03
         && candle1.bodysize < candle2.bodysize
         && candle1.low > candle2.open) {
       features[16]++;
@@ -286,12 +287,13 @@ public class PatternRecognizer {
     }
 
     // meeting lines the bear
+    // loosen condition
     if (candle1.trend == SingleCandle.TrendType.UP
         && candle1.bull
         && candle2.trend == SingleCandle.TrendType.UP
         && !candle2.bull
         && (candle1.type == SingleCandle.CandleType.TYPE_LONG || candle1.type == SingleCandle.CandleType.TYPE_MARIBOZU_LONG)
-        && candle1.close == candle2.close
+        && Math.abs(candle1.close - candle2.close) / candle1.close < 0.03
         && candle1.bodysize < candle2.bodysize
         && candle1.high < candle2.open) {
       features[17]++;
@@ -299,9 +301,10 @@ public class PatternRecognizer {
     }
 
     // matching low the bull
+    // loosen condition
     if (candle1.trend == SingleCandle.TrendType.DOWN && !candle1.bull
         && candle2.trend == SingleCandle.TrendType.DOWN
-        && !candle2.bull && candle1.close == candle2.close
+        && !candle2.bull && Math.abs(candle1.close - candle2.close) / candle1.close < 0.03
         && candle1.bodysize > candle2.bodysize) {
       features[18]++;
       features[58]++;
@@ -341,7 +344,8 @@ public class PatternRecognizer {
         && candle2.bull
         && (candle1.type == SingleCandle.CandleType.TYPE_LONG || candle1.type == SingleCandle.CandleType.TYPE_MARIBOZU_LONG)) {
       // continuation patterns: on neck line the bear
-      if (candle2.open < candle1.low && candle2.close == candle1.low) {
+      // loosen condition
+      if (candle2.open < candle1.low && Math.abs(candle1.open - candle2.close) / candle1.close < 0.03) {
         features[45]++;
         features[59]++;
       } else {
