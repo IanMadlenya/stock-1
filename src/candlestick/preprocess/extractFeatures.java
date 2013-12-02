@@ -158,7 +158,7 @@ public class extractFeatures {
 
   public static ArrayList<String> getYearList() throws Exception {
     ArrayList<String> yearList = new ArrayList<String>();
-    rs = stmt.executeQuery("SELECT distinct year(date) as year FROM stockdata");
+    rs = stmt.executeQuery("SELECT distinct year(date) as year FROM stockdata limit 10");
     while (rs.next()) {
       String year = rs.getString("year");
       yearList.add(year);
