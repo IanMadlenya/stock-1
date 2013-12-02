@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import candlestick.models.CandleRecognizer;
 import candlestick.models.Instance;
 import candlestick.models.PatternRecognizer;
 import candlestick.models.SingleCandle;
@@ -43,14 +44,15 @@ public class extractFeatures {
 
     for (String symbol : symbolList) {
       for (String year : yearList) {
-        for (int i = 1; i <= 7; i++) {
+        for (int i = 1; i <= 10; i++) {
           ArrayList<SingleCandle> candles = new ArrayList<SingleCandle>();
           String query = "SELECT * FROM stockdata WHERE symbol = \"" + symbol + "\" AND MONTH(date) BETWEEN " + i +
-              " AND " + (i + 5) + " AND YEAR(date) = " + year + " order by date desc";
+              " AND " + (i + 2) + " AND YEAR(date) = " + year + " order by date desc limit " + (CandleRecognizer.AVG_PERIOD * 2 + 1);
           rs = stmt.executeQuery(query);
 
           String sector = "";
           String industry = "";
+          String date = "";
 
           while (rs.next()) {
             if (sector.isEmpty()) {
@@ -59,6 +61,13 @@ public class extractFeatures {
 
             if (industry.isEmpty()) {
               industry = rs.getString("industry");
+              if (industry.contains(",")) {
+                industry = industry.replaceAll(",", " ");
+              }
+            }
+
+            if (date.isEmpty()) {
+              date = rs.getString("date");
             }
 
             double open = Double.parseDouble(rs.getString("open"));
@@ -69,10 +78,52 @@ public class extractFeatures {
             SingleCandle candle = new SingleCandle(open, high, low, close, volumn);
             candles.add(candle);
           }
-          String toMonth = (i + 5) > 9 ? year + (i + 5) : year + "0" + (i + 5);
-          String time = year + "0" + i + "-" + toMonth;
+
+          if (date.isEmpty()) {
+            continue;
+          }
+
+          String fromMonth = i > 9 ? year + i : year + "0" + i;
+          String toMonth = (i + 2) > 9 ? year + (i + 2) : year + "0" + (i + 2);
+          String time = fromMonth + "-" + toMonth;
+
+          if (!date.substring(5, 7).equals(toMonth.substring(4, 6))) {
+            continue;
+          }
+
           Instance instance = new Instance(candles, symbol, time, sector, industry);
+
+          SingleCandle.TrendType label = null;
+          int note = -1;
+          if (candles.size() < CandleRecognizer.AVG_PERIOD + 1 && candles.size() > 1) {
+            double sum = 0;
+            for (int j = 1; j < candles.size(); j++) {
+              sum += candles.get(j).close;
+            }
+            sum = sum / (candles.size() - 1);
+            // note = ",Less than 10 previous candles";
+            note = 0;
+            if (candles.get(0).close > sum) {
+              label = SingleCandle.TrendType.UP;
+            } else if (candles.get(0).close < sum) {
+              label = SingleCandle.TrendType.DOWN;
+            } else {
+              label = SingleCandle.TrendType.KEEP;
+            }
+          } else if (candles.size() == 1) {
+            // note = ",First price";
+            note = 1;
+            label = SingleCandle.TrendType.KEEP;
+          } else if (candles.size() == 0) {
+            // note = ",No price";
+            note = 2;
+          } else {
+            label = instance.getLabel();
+          }
+
+          instance.setLabel(label);
           StringBuffer result = new StringBuffer();
+
           if (instance.getLabel() != null) {
             result.append(instance.getLabel());
             result.append("," + instance.getSymbol());

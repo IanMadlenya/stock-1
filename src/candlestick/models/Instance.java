@@ -22,7 +22,7 @@ public class Instance {
   }
 
   public void getPatternCandles() {
-    if (candles.size() <= CandleRecognizer.AVG_PERIOD * 2) {
+    if (candles.size() <= CandleRecognizer.AVG_PERIOD) {
       return;
     }
 
@@ -33,7 +33,7 @@ public class Instance {
       i++;
     }
 
-    while (i <= (CandleRecognizer.AVG_PERIOD * 2)) {
+    while (i <= Math.min(candles.size(), CandleRecognizer.AVG_PERIOD * 2 + 1)) {
       CandleRecognizer candle = new CandleRecognizer(candleList);
       if (i == CandleRecognizer.AVG_PERIOD + 1) {
         label = candle.getResult().trend;
@@ -41,8 +41,10 @@ public class Instance {
         patternCandles.add(candle.getResult());
       }
 
-      candleList.remove(0);
-      candleList.add(candles.get(i));
+      if (i < Math.min(candles.size(), CandleRecognizer.AVG_PERIOD * 2 + 1)) {
+        candleList.remove(0);
+        candleList.add(candles.get(i));
+      }
       i++;
     }
   }
@@ -58,6 +60,10 @@ public class Instance {
 
   public SingleCandle.TrendType getLabel() {
     return label;
+  }
+
+  public void setLabel(SingleCandle.TrendType setlabel) {
+    label = setlabel;
   }
 
   public String getSymbol() {

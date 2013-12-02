@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class PatternRecognizer {
-  public static int FEATURE_NUM = 62;
+  public static int FEATURE_NUM = 63;
   private int[] features = new int[FEATURE_NUM];
 
   public PatternRecognizer(ArrayList<SingleCandle> candles) {
@@ -40,6 +40,9 @@ public class PatternRecognizer {
 
     calculateRSV(candles);
     calculateRSI(candles);
+
+    // feature[62]: how many previous days
+    features[62] = candles.size();
   }
 
   public void calculateRSV(ArrayList<SingleCandle> candles) {
