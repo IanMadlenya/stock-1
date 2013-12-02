@@ -30,12 +30,12 @@ public class extractFeatures {
     init();
     ArrayList<String> symbolList = getSymbolList();
     ArrayList<String> yearList = getYearList();
-    String filename = "/Users/none/stock/outputfull2.csv";
+    String filename = "/Users/none/stock/outputfinalfull.csv";
     BufferedWriter bw = new BufferedWriter(new FileWriter(filename));
 
     StringBuilder title = new StringBuilder();
-    title.append("label");
-    for (int i = 1; i <= PatternRecognizer.FEATURE_NUM; i++) {
+    title.append("label,symbol,time");
+    for (int i = 1; i <= PatternRecognizer.FEATURE_NUM + 2; i++) {
       title.append(",f" + i);
     }
     bw.write(title.toString());
@@ -48,7 +48,19 @@ public class extractFeatures {
           String query = "SELECT * FROM stockdata WHERE symbol = \"" + symbol + "\" AND MONTH(date) BETWEEN " + i +
               " AND " + (i + 5) + " AND YEAR(date) = " + year + " order by date desc";
           rs = stmt.executeQuery(query);
+
+          String sector = "";
+          String industry = "";
+
           while (rs.next()) {
+            if (sector.isEmpty()) {
+              sector = rs.getString("sector");
+            }
+
+            if (industry.isEmpty()) {
+              industry = rs.getString("industry");
+            }
+
             double open = Double.parseDouble(rs.getString("open"));
             double high = Double.parseDouble(rs.getString("high"));
             double low = Double.parseDouble(rs.getString("low"));
@@ -59,14 +71,19 @@ public class extractFeatures {
           }
           String toMonth = (i + 5) > 9 ? year + (i + 5) : year + "0" + (i + 5);
           String time = year + "0" + i + "-" + toMonth;
-          Instance instance = new Instance(candles, symbol, time);
+          Instance instance = new Instance(candles, symbol, time, sector, industry);
           StringBuffer result = new StringBuffer();
           if (instance.getLabel() != null) {
             result.append(instance.getLabel());
+            result.append("," + instance.getSymbol());
+            result.append("," + instance.getTime());
             int[] features = instance.getFeatures();
             for (int k = 0; k < PatternRecognizer.FEATURE_NUM; k++) {
               result.append("," + features[k]);
             }
+            result.append("," + sector);
+            result.append("," + industry);
+
             //            System.out.println(result);
             bw.write(result.toString());
             bw.newLine();

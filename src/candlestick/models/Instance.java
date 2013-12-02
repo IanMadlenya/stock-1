@@ -7,13 +7,17 @@ public class Instance {
   private ArrayList<SingleCandle> patternCandles = new ArrayList<SingleCandle>();
   private SingleCandle.TrendType label;
   private String symbol;
+  private String sector;
+  private String industry;
   private String time;
   private PatternRecognizer pattern;
 
-  public Instance(ArrayList<SingleCandle> candles, String symbol, String time) {
+  public Instance(ArrayList<SingleCandle> candles, String symbol, String time, String sector, String industry) {
     this.candles = candles;
     this.symbol = symbol;
     this.time = time;
+    this.sector = sector;
+    this.industry = industry;
     extractFeatures();
   }
 
@@ -33,7 +37,6 @@ public class Instance {
       CandleRecognizer candle = new CandleRecognizer(candleList);
       if (i == CandleRecognizer.AVG_PERIOD + 1) {
         label = candle.getResult().trend;
-        //setLabel2(candles);
       } else {
         patternCandles.add(candle.getResult());
       }
@@ -57,41 +60,19 @@ public class Instance {
     return label;
   }
 
-  private void setLabel(ArrayList<SingleCandle> candles) {
-    double close = candles.get(0).close;
-    double avg = 0;
-    for (int i = 1; i < 4; i++) {
-      avg += candles.get(i).close;
-    }
-    avg = avg / 3;
-
-    if (avg < close) {
-      label = SingleCandle.TrendType.UP;
-    } else if (avg > close) {
-      label = SingleCandle.TrendType.DOWN;
-    } else {
-      label = SingleCandle.TrendType.KEEP;
-    }
-  }
-
-  private void setLabel2(ArrayList<SingleCandle> candles) {
-    double close = candles.get(0).close;
-    double avg = candles.get(1).close;
-
-    if (avg < close) {
-      label = SingleCandle.TrendType.UP;
-    } else if (avg > close) {
-      label = SingleCandle.TrendType.DOWN;
-    } else {
-      label = SingleCandle.TrendType.KEEP;
-    }
-  }
-
   public String getSymbol() {
     return symbol;
   }
 
   public String getTime() {
     return time;
+  }
+
+  public String getSector() {
+    return sector;
+  }
+
+  public String getIndustry() {
+    return industry;
   }
 }
