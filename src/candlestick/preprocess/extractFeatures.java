@@ -31,12 +31,12 @@ public class extractFeatures {
     init();
     ArrayList<String> symbolList = getSymbolList();
     ArrayList<String> yearList = getYearList();
-    String filename = "/Users/none/stock/src/candlestick/extractedFeatures/train.csv";
+    String filename = "/Users/none/stock/src/candlestick/extractedFeatures/FinalTrain.csv";
     BufferedWriter bw = new BufferedWriter(new FileWriter(filename));
 
     StringBuilder title = new StringBuilder();
-    title.append("label,symbol,time");
-    for (int i = 1; i <= PatternRecognizer.FEATURE_NUM + 2; i++) {
+    title.append("label");
+    for (int i = 1; i <= PatternRecognizer.FEATURE_NUM; i++) {
       title.append(",f" + i);
     }
     bw.write(title.toString());
@@ -126,14 +126,14 @@ public class extractFeatures {
 
           if (instance.getLabel() != null) {
             result.append(instance.getLabel());
-            result.append("," + instance.getSymbol());
-            result.append("," + instance.getTime());
+            //            result.append("," + instance.getSymbol());
+            //            result.append("," + instance.getTime());
             int[] features = instance.getFeatures();
             for (int k = 0; k < PatternRecognizer.FEATURE_NUM; k++) {
               result.append("," + features[k]);
             }
-            result.append("," + sector);
-            result.append("," + industry);
+            //            result.append("," + sector);
+            //            result.append("," + industry);
 
             //            System.out.println(result);
             bw.write(result.toString());
