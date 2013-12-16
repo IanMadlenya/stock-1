@@ -2,3 +2,9 @@ body {
   min-height: 2000px;
   padding-top: 70px;
 }
+
+.centeredImage
+{
+  text-align:center;
+  display:block;
+}

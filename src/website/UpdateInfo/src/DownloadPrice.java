@@ -8,6 +8,12 @@ import java.util.Date;
 
 import au.com.bytecode.opencsv.CSVReader;
 
+/**
+ * Download the stock price for one company
+ * 
+ * @author shijieru
+ * 
+ */
 public class DownloadPrice {
 	// daily, weekly or monthly
 	String interval = "daily";
@@ -16,7 +22,7 @@ public class DownloadPrice {
 			PreparedStatement pst, Connection con) throws IOException {
 		Calendar begin = Calendar.getInstance();
 		begin.setTime(new Date());
-		begin.add(Calendar.DAY_OF_MONTH, -30);
+		begin.add(Calendar.DAY_OF_MONTH, -45);
 
 		String fromDate = null;
 		String toDate = null;

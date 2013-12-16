@@ -52,7 +52,10 @@ public class ComputeTextFeatures {
 				}
 
 				for (String key : dict.keySet()) {
-					bw.write(dict.get(key) + ",");
+					if (dict.get(key) >= 1)
+						bw.write(1.0 + ",");
+					else
+						bw.write(0.0 + ",");
 				}
 				bw.write(parts[3] + "\n");
 			}

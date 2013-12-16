@@ -10,15 +10,14 @@ class News(models.Model):
     stock = models.ForeignKey(Stock)
     date = models.DateField()
     content = models.TextField()
-    url = models.URLField()
+    url = models.CharField(max_length=500)
     title = models.CharField(max_length=500)
-    source = models.CharField(max_length=1000)
 
 
 class Twitter(models.Model):
     stock = models.ForeignKey(Stock)
+    symbol = models.CharField(max_length=100)
     time = models.DateTimeField()
-    author = models.CharField(max_length=200)
     content = models.TextField()
 
 

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load dajaxice_templatetags %}
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -14,8 +15,8 @@
     <link href="{% static "css/bootstrap.css" %}" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="{% static "css/stock.css" %}" rel="stylesheet">
-    <script src="{% static "js/Chart.js" %}"></script>
-
+    <link rel="stylesheet" href="{% static "css/style.css" %}" type="text/css">
+    {% dajaxice_js_import 'nocsrf' %}
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -49,21 +50,79 @@
     <div class="container">
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-
-          <form class="form-inline" role="form" style="text-align:right" action="{% url 'delete' stockid=stock.id %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
-          <h3 style="text-align:center; color:darkgrey ">Closing price for {{ stock.symbol }}</h3>
-          <canvas id="canvas" width="1000" height="450"></canvas>
-          <form class="form-inline" role="form" style="text-align:center" action="{% url 'update' stockid=stock.id %}" method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label class="sr-only" for="name">Stock Name</label>
-                 <input type="text" class="form-control" name="name" id="name" placeholder="{{ stock.name }}">
+           <form class="form-inline" role="form" style="text-align:right" action="{% url 'delete' stockid=stock.id %}" method="post">
+               {% csrf_token %}
+               <button type="submit" class="btn btn-danger">Delete</button>
+           </form>
+          <ul id="myTab" class="nav nav-tabs ">
+            <li class="active"><a href="#price" data-toggle="tab">Price Trend</a></li>
+            <li><a href="#news" data-toggle="tab">News</a></li>
+            <li><a href="#tweets" data-toggle="tab">Tweets</a></li>
+            <li class="dropdown">
+                <a href="#" id="myTabDrop1" class="dropdown-toggle" data-toggle="dropdown">Actions<b class="caret"></b></a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="myTabDrop1">
+                    <li><a href="#dropdown1" tabindex="-1" data-toggle="tab">Update Name</a></li>
+                    <li><a href="#dropdown2" tabindex="-1" data-toggle="tab">Predict Lable</a></li>
+                </ul>
+            </li>
+          </ul>
+          <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade in active" id="price">
+                <h3 style="text-align:center; color:darkgrey ">{{ stock.symbol }} CandleStick Graph</h3>
+                <div id="chartdiv" style="width:100%; height:400px;"></div>
+                <div style="float:right;margin-right:20px;">
+                    <input onChange="changeZoomDates()" style="width:100px; text-align:center"
+                        type="hidden" id="startDate">
+                    <input onChange="changeZoomDates()" style="width:100px; text-align:center"
+                        type="hidden" id="endDate"></div>
             </div>
-            <button type="submit" class="btn btn-default">Update</button>
-          </form>
+            <div class="tab-pane fade" id="news">
+                <div class="panel-group" id="accordion">
+                    {% for news in news_list %}
+                      {% if news.content != "" %}
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ forloop.counter }}">
+                                    {{ news.title }} POSTED ON {{news.date}}
+                                </a>
+                                </h4>
+                            </div>
+                            <div id="collapse{{ forloop.counter }}" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                {{ news.content }}
+                                </div>
+                            </div>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade in " id="tweets">
+                {% with stock.symbol|slice:"1:" as symbol %}
+                <center><img src="{% static "images/"|add:symbol|add:".png" %}" alt="{{ stock.name }}" class="img-rounded">
+                {% endwith %}
+            </div>
+            <div class="tab-pane fade" id="dropdown1">
+                <form class="form-inline" role="form" style="text-align:center" action="{% url 'update' stockid=stock.id %}" method="post">
+                {% csrf_token %}
+                    <div class="form-group">
+                        <label class="sr-only" for="name">Stock Name</label>
+                        <input type="text" class="form-control" name="name" id="name" placeholder="{{ stock.name }}">
+                    </div>
+                    <button type="submit" class="btn btn-default">Update</button>
+                </form>
+            </div>
+            <div class="tab-pane fade" id="dropdown2">
+                <form class="form-inline" role="form" style="text-align:center">
+                {% csrf_token %}
+                    <h3>Label: <span class="label label-default" id="predictlabel">Undefined</span></h3>
+                    <input type="button"  class="btn btn-primary btn-lg" onclick="Dajaxice.stock.predict(callback, {'symbol':{{ stock.id }}})" value="Predict!"/>
+                </form>
+            </div>
+          </div>
+
+
       </div>
 
     </div> <!-- /container -->
@@ -76,33 +135,178 @@
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     {% load staticfiles %}
     <script src="{% static "js/bootstrap.min.js" %}"></script>
+    <script src="{% static "js/amcharts.js" %}" type="text/javascript"></script>
+    <script src="{% static "js/serial.js" %}" type="text/javascript"></script>
 
-    <script>
-		var lineChartData = {
-			labels : [
-                {% for price in price_list %}
-                    "{{ price.date }}"
-                    {% if not forloop.last %},{% endif %}
-                {% endfor %}
-            ],
-			datasets : [
-				{
-					fillColor : "rgba(151,187,205,0.5)",
-					strokeColor : "rgba(151,187,205,1)",
-					pointColor : "rgba(151,187,205,1)",
-					pointStrokeColor : "#fff",
-					data : [
-                        {% for price in price_list %}
-                            {{ price.close }}
-                            {% if not forloop.last %},{% endif %}
-                        {% endfor %}
-                    ]
-				 }
-			]
-		}
+    <script type="text/javascript">
+            function callback(data){
+                document.getElementById("predictlabel").innerHTML=data.label;
+            }
 
-	var myLine = new Chart(document.getElementById("canvas").getContext("2d")).Line(lineChartData);
 
-	</script>
+            var chart;
+            var graph;
+            var graphType = "candlestick";
+            var maxCandlesticks = 100;
+
+            var dataString = "{% for price in price_list %}{{ price.date }},{{price.open}},{{price.high}},{{price.low}},{{price.close}}{% if not forloop.last %}\n{% endif %}{% endfor %}"
+            var chartData = [];
+
+            AmCharts.ready(function () {
+                // first parse data string
+                parseData();
+
+                // SERIAL CHART
+                chart = new AmCharts.AmSerialChart();
+                chart.pathToImages = "";
+                chart.dataProvider = chartData;
+                chart.categoryField = "date";
+                // listen for dataUpdated event ad call "zoom" method then it happens
+                chart.addListener('dataUpdated', zoomChart);
+                // listen for zoomed event andcall "handleZoom" method then it happens
+                chart.addListener('zoomed', handleZoom);
+
+                // AXES
+                // category
+                var categoryAxis = chart.categoryAxis;
+                categoryAxis.parseDates = true; // as our data is date-based, we set this to true
+                categoryAxis.minPeriod = "DD"; // our data is daily, so we set minPeriod to "DD"
+                categoryAxis.dashLength = 1;
+                categoryAxis.tickLenght = 0;
+                categoryAxis.inside = true;
+
+                // value
+                var valueAxis = new AmCharts.ValueAxis();
+                valueAxis.dashLength = 1;
+                valueAxis.axisAlpha = 0;
+                chart.addValueAxis(valueAxis);
+
+                // GRAPH
+                graph = new AmCharts.AmGraph();
+                graph.title = "Price:";
+                // as candlestick graph looks bad when there are a lot of candlesticks, we set initial type to "line"
+                graph.type = "line";
+                // graph colors
+                graph.lineColor = "#7f8da9";
+                graph.fillColors = "#7f8da9";
+                graph.negativeLineColor = "#db4c3c";
+                graph.negativeFillColors = "#db4c3c";
+                graph.fillAlphas = 1;
+                // candlestick graph has 4 fields - open, low, high, close
+                graph.openField = "open";
+                graph.highField = "high";
+                graph.lowField = "low";
+                graph.closeField = "close";
+                graph.balloonText = "Open:<b>[[open]]</b><br>Low:<b>[[low]]</b><br>High:<b>[[high]]</b><br>Close:<b>[[close]]</b><br>";
+                // this one is for "line" graph type
+                graph.valueField = "close";
+
+                chart.addGraph(graph);
+
+                // CURSOR
+                var chartCursor = new AmCharts.ChartCursor();
+                chart.addChartCursor(chartCursor);
+
+                // SCROLLBAR
+                var chartScrollbar = new AmCharts.ChartScrollbar();
+                chartScrollbar.scrollbarHeight = 30;
+                chartScrollbar.graph = graph; // as we want graph to be displayed in the scrollbar, we set graph here
+                chartScrollbar.graphType = "line"; // we don't want candlesticks to be displayed in the scrollbar
+                chartScrollbar.gridCount = 4;
+                chartScrollbar.color = "#FFFFFF";
+                chart.addChartScrollbar(chartScrollbar);
+
+                // WRITE
+                chart.write("chartdiv");
+            });
+
+
+            // this method is called when chart is first inited as we listen for "dataUpdated" event
+            function zoomChart() {
+                // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
+                chart.zoomToIndexes(chartData.length - 7, chartData.length - 1);
+            }
+
+            // this methid is called each time the selected period of the chart is changed
+            function handleZoom(event) {
+                var startDate = event.startDate;
+                var endDate = event.endDate;
+                document.getElementById("startDate").value = AmCharts.formatDate(startDate, "DD/MM/YYYY");
+                document.getElementById("endDate").value = AmCharts.formatDate(endDate, "DD/MM/YYYY");
+
+                // as we also want to change graph type depending on the selected period, we call this method
+                changeGraphType(event);
+            }
+
+            // changes graph type to line/candlestick, depending on the selected range
+            function changeGraphType(event) {
+                var startIndex = event.startIndex;
+                var endIndex = event.endIndex;
+
+                if (endIndex - startIndex > maxCandlesticks) {
+                    // change graph type
+                    if (graph.type != "line") {
+                        graph.type = "line";
+                        graph.fillAlphas = 0;
+                        chart.validateNow();
+                    }
+                } else {
+                    // change graph type
+                    if (graph.type != graphType) {
+                        graph.type = graphType;
+                        graph.fillAlphas = 1;
+                        chart.validateNow();
+                    }
+                }
+            }
+
+            // Parse data
+            function parseData() {
+                // split data string into array
+                var rowArray = dataString.split("\n");
+                // loop through this array and create data items
+                for (var i = rowArray.length - 1; i > -1; i--) {
+                    var row = rowArray[i].split(",");
+                    var dateArray = row[0].split("-");
+                    // we have to subtract 1 from month, as months in javascript are zero-based
+                    var date = new Date(Number(dateArray[0]), Number(dateArray[1]) - 1, Number(dateArray[2]));
+                    var open = row[1];
+                    var high = row[2];
+                    var low = row[3];
+                    var close = row[4];
+
+                    chartData.push({
+                        date: date,
+                        open: open,
+                        high: high,
+                        low: low,
+                        close: close
+                    });
+                }
+            }
+
+            // this method converts string from input fields to date object
+            function stringToDate(str) {
+                var dArr = str.split("/");
+                var date = new Date(Number(dArr[2]), Number(dArr[1]) - 1, dArr[0]);
+                return date;
+            }
+
+            // this method is called when user changes dates in the input field
+            function changeZoomDates() {
+                var startDateString = document.getElementById("startDate").value;
+                var endDateString = document.getElementById("endDate").value;
+                var startDate = stringToDate(startDateString);
+                var endDate = stringToDate(endDateString);
+                chart.zoomToDates(startDate, endDate);
+            }
+
+
+            AMCHARTS_LENS_IMAGE = '{% static "images/lens.png" %}';
+            AMCHARTS_DRAGICON_IMAGE = '{% static "images/dragIcon.gif" %}';
+
+        </script>
+
+
   </body>
 </html>

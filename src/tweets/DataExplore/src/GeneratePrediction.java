@@ -15,7 +15,7 @@ public class GeneratePrediction {
 			BufferedWriter bw = new BufferedWriter(new FileWriter("result.csv"));
 			bw.write("symbol,date,label\n");
 
-			br = new BufferedReader(new FileReader("group10_test.csv"));
+			br = new BufferedReader(new FileReader("group10.csv"));
 			br.readLine();
 			while ((line = br.readLine()) != null) {
 				String[] parts = line.split(",");
@@ -33,7 +33,7 @@ public class GeneratePrediction {
 			}
 			br.close();
 
-			br = new BufferedReader(new FileReader("test_label.txt"));
+			br = new BufferedReader(new FileReader("10Labels.txt"));
 			br.readLine();
 			int index = 0;
 			while ((line = br.readLine()) != null) {
