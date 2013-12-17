@@ -1,3 +1,5 @@
+package candlestick.getData;
+
 import java.io.*;
 import java.net.*;
 
