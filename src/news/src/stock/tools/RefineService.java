@@ -24,10 +24,10 @@ public class RefineService implements Runnable {
 	ptns.put("http://finance.yahoo.com", ".body p");
 	ptns.put("http://biz.yahoo.com", "div p");
 	ptns.put("http://seekingalpha.com", "#article_body");
-	ptns.put("http://www.fool.com", ".entry_content");
+	ptns.put("http://www.fool.com", ".entry-content");
 	ptns.put("http://www.forbes.com", ".body p");
 	ptns.put("http://www.thestreet.com", "#storyBody");
-	ptns.put("http://beta.fool.com", ".content p");
+	ptns.put("http://beta.fool.com", "p");
 	ptns.put("http://www.bloomberg.com", "#story_display p");
 	ptns.put("http://news.investors.com", ".newsStory p");
 	ptns.put("http://www.reuters.com", "#articleText");
@@ -79,6 +79,7 @@ public class RefineService implements Runnable {
 			writer.println(title + "\n");
 			writer.println(url + "\n");
 			writer.println(date + "\n");
+			
 			if (ptns.containsKey(sourceurl)) {
 			    try {
 				Document doc = Jsoup.connect(url).get();
@@ -101,7 +102,7 @@ public class RefineService implements Runnable {
     }
     
     public static void main(String[] argv) {
-	Thread t = new Thread(new RefineService("AAPL"));
+	Thread t = new Thread(new RefineService("ABAX"));
 	t.run();
     }
 

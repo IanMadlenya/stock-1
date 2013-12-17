@@ -1,6 +1,6 @@
 ### Basic statistical information ###
 
-The news dataset includes news from 08/01/2013 to 09/30/2013 for each company. The size of the data is 6.77 GB. Among 500 companies, 14 of them do not have news during that period of time. The 15 companies are:
+The news dataset includes news from 08/01/2013 to 09/30/2013 for each company. The size of the data is 6.77 GB. Among 500 companies, 15 of them do not have news during that period of time. The 15 companies are:
 
 ROICU, INXBU, CLACW, SANWZ, WTFCW, GALTU, WAFDW, BPOPN, AGIIL, CUBIL, TROVU, TCBIP, TCBIL, CISAW, INTLL
 

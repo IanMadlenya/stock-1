@@ -1,24 +1,22 @@
 package stock.tools;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import java.util.Set;
 
 public class Analyzer {
     
-    private static final String NEWS_PATH = "news-500";
+    private static final String NEWS_PATH = "news";
     
     public static void countSources() throws Exception {
 	File dir = new File(NEWS_PATH);
@@ -114,10 +112,6 @@ public class Analyzer {
 		    if (subsubdir.isDirectory()) {
 			int count = 0;
 			for (String nn : subsubdir.list()) {
-			    count++;
-			    if (count == 2) {
-				break;
-			    }
 			    if (!nn.startsWith(".")) {
 				File nf = new File(NEWS_PATH + "/" + fn + "/" + dn + "/" + nn);
 				Scanner scanner = new Scanner(nf);
@@ -160,25 +154,60 @@ public class Analyzer {
 	writer.close();
     }
     
+    public static int freq(String news, String symbol, String name) {
+	String[] tokens = NewsTokenizer.tokenize(news);
+	int freq = 0;
+	for (String token : tokens) {
+	    if (token.indexOf(symbol.toLowerCase()) >= 0 || token.indexOf(name) >= 0) {
+		freq++;
+	    }
+	}
+	return freq;
+    }
+    
+    public static Map<String, String> symbolToName() {
+	Map<String, String> mapping = new HashMap<String, String>();
+	try {
+	    Scanner scanner = new Scanner(new File("companylist500.csv"));
+	    scanner.nextLine();
+	    while (scanner.hasNextLine()) {
+		String line = scanner.nextLine();
+		String[] tokens = line.split(",");
+		String company = tokens[1].replace('\"', ' ').trim().split("\\s+")[0];
+		System.out.println(tokens[0] + " " + company);
+		mapping.put(tokens[0], company.toLowerCase());
+	    }
+	    scanner.close();
+	} catch (FileNotFoundException e) {
+	    e.printStackTrace();
+	}
+	return mapping;
+    }
+    
     public static void gather() throws Exception {
+	Map<String, String> map = symbolToName();
+	
 	File dir = new File(NEWS_PATH);
 	PrintWriter writer = new PrintWriter("news-all.txt");
-	int count = 0;
 	int newscount = 0;
 	for (String fn : dir.list()) {
-	    count++;
-	    if (count == 3)
-		break;
-	    System.out.println(fn);
+	    System.out.println("symbol: " + fn);
 	    File subdir = new File(NEWS_PATH + "/" + fn);
 	    if (subdir.isDirectory()) {
 		for (String dn : subdir.list()) {
+		    if (!dn.startsWith("2013-09") && !dn.startsWith("2013-10"))
+			continue;
+		    
 		    File subsubdir = new File(NEWS_PATH + "/" + fn + "/" + dn);
 		    if (subsubdir.isDirectory()) {
 			for (String nn : subsubdir.list()) {
 			    if (!nn.startsWith(".")) {
 				File nf = new File(NEWS_PATH + "/" + fn + "/" + dn + "/" + nn);
 				Scanner scanner = new Scanner(nf);
+				if (!scanner.hasNextLine()) {
+				    scanner.close();
+				    continue;
+				}
 				String title = scanner.nextLine();
 				scanner.nextLine();
 				scanner.nextLine();
@@ -186,8 +215,18 @@ public class Analyzer {
 				scanner.nextLine();
 				scanner.nextLine();
 				String content = scanner.nextLine();
-				String[] tokens = NewsTokenizer.tokenize(title + " " + content);
 				scanner.close();
+				if (content.trim().equals("")) {
+				    continue;
+				}
+				
+				int freq = freq(title + " " + content, fn, map.get(fn));
+				// System.out.println("freq: " + freq);
+				if (freq < 4) {
+				    continue;
+				}
+				
+				String[] tokens = NewsTokenizer.tokenize(title + " " + content);
 				for (String token : tokens) {
 				    writer.print(token + " ");
 				}
@@ -205,11 +244,29 @@ public class Analyzer {
 	System.out.println(newscount);
     }
     
+    public static void convert() {
+	try {
+	    Scanner scanner = new Scanner(new File("roadNet-PA.txt"));
+	    PrintWriter writer = new PrintWriter("roadNet-PA.csv");
+	    while (scanner.hasNextLine()) {
+		String[] tokens = scanner.nextLine().split("\\s+");
+		writer.println(tokens[0] + "," + tokens[1]);
+		// writer.println(tokens[1] + "," + tokens[0]);
+	    }
+	    writer.flush();
+	    writer.close();
+	    scanner.close();
+	} catch (FileNotFoundException e) {
+	    e.printStackTrace();
+	}
+    }
+    
     public static void main(String[] argv) throws Exception {
 	// countSources();
 	// generateDict();
+	// symbolToName();
 	gather();
 	// refinePage("http://finance.yahoo.com/news/atlas-financial-holdings-announces-expiration-225100238.html");
-    }    
+    }
 
 }
